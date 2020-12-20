@@ -7,6 +7,42 @@ using xNet;
 
 namespace DnevnikRuAPI
 {
+    public static class Translator
+    {
+        public enum From
+        {
+            en,
+            ru
+        }
+
+        public enum To
+        {
+            en,
+            ru
+        }
+        public static TranslatorResponse Translate(From from, To to, string text)
+        {
+            var content = "";
+            using (var request = new HttpRequest())
+            {
+                string uuid = "41e9fbd2269a463f9e8f7270f14bc047&id=541015a9e1a245709e972d5ad18c0929-3-0";
+                string lang = $"{from}-{to}";
+                var response = request.Get($"http://translate.yandex.net/api/v1/tr.json/translate?srv=android&uuid={uuid}&lang={lang}&text={text}");
+
+                content = response.ToString();
+            }
+
+            return JsonConvert.DeserializeObject<TranslatorResponse>(content);
+        }
+
+        public class TranslatorResponse
+        {
+            public int code { get; set; }
+            public string lang { get; set; }
+            public List<string> text { get; set; }
+        }
+    }
+
     public class DnevnikRuAPI
     {
         public static string Access_Token = "";
@@ -163,7 +199,9 @@ namespace DnevnikRuAPI
 
                     var response =
                         request.Get(
-                            $"https://api.dnevnik.ru/v2.0/users/me/school/{schoolId}/homeworks?startDate={startDate}&endDate={endDate}");
+                            $"https://api.dnevnik.ru/v2.0/users/me/school/{schoolId}/homeworks" +
+                            $"?startDate={startDate}" +
+                            $"&endDate={endDate}");
 
                     content = response.ToString();
                 }
